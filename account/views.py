@@ -41,7 +41,7 @@ class ListAccount(ListCreateAPIView):
 
 class AccountDetail(RetrieveUpdateDestroyAPIView):
     queryset = Account.objects.all()
-    serializer_class = AccountSerializer
+    serializer_class = AccountCreateSerializer
     # def get(self, request, pk):
     #     account = get_object_or_404(Account, pk=pk)
     #     serializer = AccountSerializer(account)
