@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,18 +13,23 @@ from .serializers import AccountSerializer, AccountCreateSerializer
 
 
 # Create your views here.
-class ListAccount(APIView):
+class ListAccount(ListCreateAPIView):
+    def get_queryset(self):
+        return Account.objects.all()
 
-    def get(self, request):
-        accounts = Account.objects.all()
-        serializer = AccountSerializer(accounts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_serializer_class(self):
+        return AccountCreateSerializer
 
-    def post(self, request):
-        serializer = AccountCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # def get(self, request):
+    #     accounts = Account.objects.all()
+    #     serializer = AccountSerializer(accounts, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    # def post(self, request):
+    #     serializer = AccountCreateSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # @api_view(['GET', 'POST'])
@@ -85,17 +91,13 @@ def deposit(request):
     account_number = request.data['account_number']
     amount = request.data['amount']
     account = get_object_or_404(Account, pk=account_number)
-    if account.balance:
-        account.balance += Decimal(amount)
-        account.save()
-        Transaction.objects.create(
-            account=account,
-            amount=amount
-        )
-        return Response(data={"message": "Insufficient balance"}, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response(data={"message": "Transaction successful"},
-                        status=status.HTTP_200_OK)
+    account.balance += Decimal(amount)
+    account.save()
+    Transaction.objects.create(
+        account=account,
+        amount=amount
+    )
+    return Response(data={"message": "Transaction successful"}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
