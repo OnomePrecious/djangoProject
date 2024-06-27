@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'demo',
     'account',
+    'user',
 ]
 
 MIDDLEWARE = [
@@ -80,10 +81,6 @@ WSGI_APPLICATION = 'accountManagementSystem.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'account_db',
-        'USER': 'root',
-        'PASSWORD': 'oghenebukowho672',
-        'HOST': 'localhost',
     }
 }
 
@@ -128,3 +125,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'user.User'
