@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,11 +14,15 @@ from .serializers import AccountSerializer, AccountCreateSerializer
 
 # Create your views here.
 class ListAccount(ListCreateAPIView):
-    def get_queryset(self):
-        return Account.objects.all()
+    queryset = Account.objects.all()
+    serializer_class = AccountCreateSerializer
 
-    def get_serializer_class(self):
-        return AccountCreateSerializer
+    # def get_queryset(self):
+    #     return Account.objects.all()
+    #
+    # def get_serializer_class(self):
+    #     return AccountCreateSerializer
+    #
 
 
 # @api_view(['GET', 'POST'])
@@ -35,23 +39,25 @@ class ListAccount(ListCreateAPIView):
 #
 
 
-class AccountDetail(APIView):
-    def get(self, request, pk):
-        account = get_object_or_404(Account, pk=pk)
-        serializer = AccountSerializer(account)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        account = get_object_or_404(Account, pk=pk)
-        serializer = AccountCreateSerializer(account, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def delete(self, request, pk):
-        account = get_object_or_404(Account, pk=pk)
-        account.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class AccountDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Account.objects.all()
+    serializer_class = AccountSerializer
+    # def get(self, request, pk):
+    #     account = get_object_or_404(Account, pk=pk)
+    #     serializer = AccountSerializer(account)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    # def put(self, request, pk):
+    #     account = get_object_or_404(Account, pk=pk)
+    #     serializer = AccountCreateSerializer(account, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    # def delete(self, request, pk):
+    #     account = get_object_or_404(Account, pk=pk)
+    #     account.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
