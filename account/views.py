@@ -20,17 +20,6 @@ class ListAccount(ListCreateAPIView):
     def get_serializer_class(self):
         return AccountCreateSerializer
 
-    # def get(self, request):
-    #     accounts = Account.objects.all()
-    #     serializer = AccountSerializer(accounts, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    # def post(self, request):
-    #     serializer = AccountCreateSerializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 # @api_view(['GET', 'POST'])
 # def list_account(request):
