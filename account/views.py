@@ -116,7 +116,3 @@ def withdraw(request):
 
     return Response(data={"message": "Transaction successful"}, status=status.HTTP_200_OK)
 
-
-class CreateAccount(CreateAPIView):
-    queryset = Account.objects.all()
-    serializer_class = AccountCreateSerializer
