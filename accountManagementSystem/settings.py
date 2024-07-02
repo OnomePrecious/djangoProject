@@ -84,8 +84,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'account_db',
         'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '',
 
     }
 }
@@ -149,4 +147,6 @@ DJOSER = {
         'user_create': 'user.serializers.UserCreateSerializer',
     }
 }
+
+ADMIN_URL = 'accountAdmin'
 
