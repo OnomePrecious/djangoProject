@@ -25,6 +25,9 @@ class Account(models.Model):
     def __str__(self):
         return f"{self.account_type}{self.account_number}"
 
+    # def first_name(self):
+    #     return self.user.first_name
+
 
 class Transaction(models.Model):
     TRANSACTION_TYPE = [
