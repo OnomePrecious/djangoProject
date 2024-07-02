@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -114,3 +115,8 @@ def withdraw(request):
         return Response(data={"message": "Invalid pin"}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(data={"message": "Transaction successful"}, status=status.HTTP_200_OK)
+
+
+class CreateAccount(CreateAPIView):
+    queryset = Account.objects.all()
+    serializer_class = AccountCreateSerializer
