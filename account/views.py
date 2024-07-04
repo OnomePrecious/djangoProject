@@ -122,20 +122,54 @@ class Deposit(APIView):
 
 class Withdraw(APIView):
     def post(self, request):
-        account_number = request.data['account_number']
-        amount = request.data['amount']
-        pin = request.data['pin']
+        serializer = DepositWithdrawSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        account_number = serializer.data['account_number']
+        amount = serializer.data['amount']
+        # pin = serializer.data['pin']
+        transaction_details = {}
         account = get_object_or_404(Account, pk=account_number)
-        if account.pin == pin:
-            if account.balance > amount:
-                account.balance -= Decimal(amount)
-                account.save()
-            else:
-                return Response(data={"message": "Insufficient balance"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(data={"message": "Invalid pin"}, status=status.HTTP_400_BAD_REQUEST)
+        balance = account.balance
+        # pin = account.pin
+        balance -= amount
+        Account.objects.filter(account_number=account_number).update(balance=balance)
+        Transaction.objects.create(
+            account=account,
+            amount=amount
+        )
+        transaction_details['account_number'] = account_number
+        transaction_details['amount'] = amount
+        transaction_details['transaction_type'] = 'DEBIT'
+        return Response(data=transaction_details, status=status.HTTP_200_OK)
 
-        return Response(data={"message": "Transaction successful"}, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # @api_view(['POST'])
 # def withdraw(request):
