@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Account, Transaction
-from .serializers import AccountCreateSerializer, DepositWithdrawSerializer
+from .serializers import AccountCreateSerializer, DepositSerializer
 
 
 class AccountViewSet(ModelViewSet):
@@ -86,7 +86,7 @@ class AccountViewSet(ModelViewSet):
 
 class Deposit(APIView):
     def post(self, request):
-        serializer = DepositWithdrawSerializer(data=request.data)
+        serializer = DepositSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         account_number = serializer.data['account_number']
         amount = Decimal(serializer.data['amount'])
@@ -122,17 +122,17 @@ class Deposit(APIView):
 
 class Withdraw(APIView):
     def post(self, request):
-        serializer = DepositWithdrawSerializer(data=request.data)
+        serializer = DepositSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         account_number = serializer.data['account_number']
-        amount = serializer.data['amount']
-        # pin = serializer.data['pin']
+        amount = Decimal(serializer.data['amount'])
+        pin = serializer.data['pin']
         transaction_details = {}
         account = get_object_or_404(Account, pk=account_number)
         balance = account.balance
-        # pin = account.pin
+        pin = account.pin
         balance -= amount
-        Account.objects.filter(account_number=account_number).update(balance=balance)
+        Account.objects.filter(pin= pin,account_number=account_number).update(balance=balance)
         Transaction.objects.create(
             account=account,
             amount=amount
