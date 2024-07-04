@@ -121,7 +121,7 @@ class Deposit(APIView):
 
 
 class Withdraw(APIView):
-    def post(self, request):
+    def patch(self, request):
         serializer = WithdrawSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         account_number = serializer.data['account_number']
@@ -130,7 +130,6 @@ class Withdraw(APIView):
         transaction_details = {}
         account = get_object_or_404(Account, pk=account_number)
         balance = account.balance
-        pin = account.pin
         balance -= amount
         Account.objects.filter(pin=pin, account_number=account_number).update(balance=balance)
         Transaction.objects.create(
