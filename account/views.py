@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Account, Transaction
 from .serializers import AccountCreateSerializer, DepositSerializer, WithdrawSerializer
@@ -121,6 +122,8 @@ class Deposit(APIView):
 
 
 class Withdraw(APIView):
+    permission_classes = [IsAuthenticated]
+
     def patch(self, request):
         serializer = WithdrawSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -157,3 +160,10 @@ class Withdraw(APIView):
 #     return Response(data={"message": "Invalid pin"}, status=status.HTTP_400_BAD_REQUEST)
 #
 # return Response(data={"message": "Transaction successful"}, status=status.HTTP_200_OK)
+
+
+class Balance(APIView):
+    def get(self, request):
+        account_number = request.query_params.get('account_number')
+        account = get_object_or_404(Account, pk=account_number)
+        return Response(data={"balance": account.balance}, status=status.HTTP_200_OK)

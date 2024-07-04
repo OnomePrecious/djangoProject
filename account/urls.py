@@ -13,6 +13,7 @@ urlpatterns = [
 
     path('deposit', views.Deposit.as_view()),
     path('withdraw', views.Withdraw.as_view()),
+    path('balance', views.Balance.as_view()),
 ]
 # path('accounts', views.ListAccount.as_view()),
 # path('accounts/<str:pk>', views.AccountDetail.as_view()),
