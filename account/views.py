@@ -2,13 +2,12 @@ from decimal import Decimal
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Account, Transaction
-from .serializers import AccountCreateSerializer
+from .serializers import AccountCreateSerializer, DepositWithdrawSerializer
 
 
 class AccountViewSet(ModelViewSet):
@@ -87,16 +86,23 @@ class AccountViewSet(ModelViewSet):
 
 class Deposit(APIView):
     def post(self, request):
-        account_number = request.data['account_number']
-        amount = Decimal(request.data['amount'])
+        serializer = DepositWithdrawSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        account_number = serializer.data['account_number']
+        amount = Decimal(serializer.data['amount'])
+        transaction_details = {}
         account = get_object_or_404(Account, pk=account_number)
-        account.balance += amount
-        account.save()
+        balance = account.balance
+        balance += amount
+        Account.objects.filter(account_number=account_number).update(balance=balance)
         Transaction.objects.create(
             account=account,
             amount=amount
         )
-        return Response(data={"message": "Transaction successful"}, status=status.HTTP_200_OK)
+        transaction_details['account_number'] = account_number
+        transaction_details['amount'] = amount
+        transaction_details['transaction_type'] = 'CREDIT'
+        return Response(data=transaction_details, status=status.HTTP_200_OK)
 
 
 # @api_view(["POST"])
