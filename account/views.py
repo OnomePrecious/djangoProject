@@ -1,14 +1,19 @@
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
+import user
 from .models import Account, Transaction
-from .serializers import AccountCreateSerializer, DepositSerializer, WithdrawSerializer, BalanceSerializer
+from .serializers import AccountCreateSerializer, DepositSerializer, WithdrawSerializer, BalanceSerializer, \
+    TransferSerializer
 
 
 class AccountViewSet(ModelViewSet):
@@ -174,3 +179,55 @@ class Balance(APIView):
         return Response(data={"balance": account.balance}, status=status.HTTP_200_OK)
 
 
+class TransferViewSet(ModelViewSet):
+    queryset = Account.objects.all()
+    serializer_class = TransferSerializer
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        print(user)
+        serializer = TransferSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        sender_account = serializer.data['sender_account']
+        receiver_account = serializer.data['receiver_account']
+        amount = Decimal(serializer.data['amount'])
+        transaction_details = {}
+        sender_account_from = get_object_or_404(Account, pk=sender_account)
+        receiver_account_to = get_object_or_404(Account, pk=receiver_account)
+        balance = sender_account_from.balance
+        transaction_details = {}
+        if balance > amount:
+            balance -= amount
+        else:
+            return Response(data={"message": "Insufficient balance"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            transferred_balance = receiver_account_to.balance + amount
+            Account.objects.filter(pk=receiver_account).update(balance=transferred_balance)
+        except Account.DoesNotExist:
+            return Response(data={"message": "Transaction failed"}, status=status.HTTP_400_BAD_REQUEST)
+        Transaction.objects.create(
+            account=sender_account_from,
+            amount=amount,
+            transaction_type='TRANSFER'
+        )
+        transaction_details['receiver_account'] = receiver_account
+        transaction_details['amount'] = amount
+        transaction_details['transaction_type'] = 'TRANSFER'
+        return Response(data=transaction_details, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(data="Method not supported", status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def list(self, request, *args, **kwargs):
+        return Response(data="Method not supported", status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view()
+@login_required
+def check_balance(request):
+    user = request.user
+    account = get_object_or_404(Account, user=user.id)
+    balance_details = {'account_number': account.account_number, 'balance': account.balance}
+    return Response(data=balance_details, status=status.HTTP_200_OK)
