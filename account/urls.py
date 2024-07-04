@@ -7,8 +7,10 @@ router.register('accounts', views.AccountViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+
     # path('accounts', views.ListAccount.as_view()),
     # path('accounts/<str:pk>', views.AccountDetail.as_view()),
+
     path('deposit', views.Deposit.as_view()),
     path('withdraw', views.Withdraw.as_view()),
 ]
