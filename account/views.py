@@ -8,7 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Account, Transaction
-from .serializers import AccountCreateSerializer, DepositSerializer, WithdrawSerializer
+from .serializers import AccountCreateSerializer, DepositSerializer, WithdrawSerializer, BalanceSerializer
 
 
 class AccountViewSet(ModelViewSet):
@@ -144,6 +144,7 @@ class Withdraw(APIView):
         transaction_details['transaction_type'] = 'DEBIT'
         return Response(data=transaction_details, status=status.HTTP_200_OK)
 
+
 # @api_view(['POST'])
 # def withdraw(request):
 # account_number = request.data['account_number']
@@ -163,7 +164,13 @@ class Withdraw(APIView):
 
 
 class Balance(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        account_number = request.query_params.get('account_number')
+        serializer = BalanceSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        account_number = serializer.data['account_number']
         account = get_object_or_404(Account, pk=account_number)
         return Response(data={"balance": account.balance}, status=status.HTTP_200_OK)
+
+

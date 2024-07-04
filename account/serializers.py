@@ -38,3 +38,7 @@ class TransferSerializer(serializers.Serializer):
     sender_account = serializers.CharField(max_length=10)
     receiver_account = serializers.CharField(max_length=10)
     amount = serializers.DecimalField(max_digits=15, decimal_places=2)
+
+
+class BalanceSerializer(serializers.Serializer):
+    account_number = serializers.CharField(max_length=10)
