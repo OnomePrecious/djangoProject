@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'account',
     'user',
     'djoser'
+    "corsheaders",
+
 ]
 
 MIDDLEWARE = [
@@ -81,7 +83,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'account_db',
         'USER': 'root',
-        # 'PASSWORD': 'oghenebukowho672',
         'HOST': 'localhost',
 
     }
@@ -132,14 +133,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
-
+    # 'DEFAULT_PERMISSION_CLASSES': [ global authentication
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ]
+    #
 }
 
 SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
+    # 'AUTH_HEADER_TYPES': ('JWT',),
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
 
 }
@@ -150,4 +151,14 @@ DJOSER = {
     }
 }
 
-ADMIN_URL = 'accountAdmin'
+# ADMIN_URL = 'accountAdmin'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 2525
+DEFAULT_FROM_EMAIL = 'info@jagudabank.com'
+
+
+LOGIN_REDIRECT_URL = 'jwt-create'
