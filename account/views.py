@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -8,7 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 import user
 from .models import Account, Transaction
@@ -91,6 +92,8 @@ class AccountViewSet(ModelViewSet):
 
 
 class Deposit(APIView):
+    permission_classes = [IsAdminUser]
+
     def post(self, request):
         serializer = DepositSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -186,8 +189,6 @@ class TransferViewSet(ModelViewSet):
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
-        user = request.user
-        print(user)
         serializer = TransferSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         sender_account = serializer.data['sender_account']
@@ -197,7 +198,6 @@ class TransferViewSet(ModelViewSet):
         sender_account_from = get_object_or_404(Account, pk=sender_account)
         receiver_account_to = get_object_or_404(Account, pk=receiver_account)
         balance = sender_account_from.balance
-        transaction_details = {}
         if balance > amount:
             balance -= amount
         else:
@@ -209,8 +209,12 @@ class TransferViewSet(ModelViewSet):
             return Response(data={"message": "Transaction failed"}, status=status.HTTP_400_BAD_REQUEST)
         Transaction.objects.create(
             account=sender_account_from,
-            amount=amount,
+            amount='-' + str(amount),
             transaction_type='TRANSFER'
+        )
+        Transaction.objects.create(
+            account=receiver_account_to,
+            amount='+' + str(amount),
         )
         transaction_details['receiver_account'] = receiver_account
         transaction_details['amount'] = amount
@@ -222,6 +226,24 @@ class TransferViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return Response(data="Method not supported", status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class CheckBalance(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        account = get_object_or_404(Account, user=user.id)
+        balance_details = {'account number': account.account_number, 'balance': account.balance}
+        message = f'''
+        your new balance is
+        {account.balance}
+        thank you for banking with jaguda'''
+        send_mail(subject="JAGUDA BANK",
+                  message=message,
+                  from_email='noreply@jaguda.com',
+                  recipient_list=[f'{user.email}'])
+        return Response(data=balance_details, status=status.HTTP_200_OK)
 
 
 @api_view()
