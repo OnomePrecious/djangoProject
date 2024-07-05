@@ -46,9 +46,9 @@ class Transaction(models.Model):
     transaction_type = models.CharField(max_length=3,
                                         choices=TRANSACTION_TYPE,
                                         default='CRE')
-    transaction_time = models.DateTimeField(auto_now=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2)
-    description = models.TextField(blank=True, null=True)
+    transaction_time = models.DateTimeField(auto_now_add=True)
+    amount = models.CharField(max_length=20)
+    description = models.CharField(max_length=255, blank=True, null=True)
     transaction_status = models.CharField(max_length=1,
                                           choices=TRANSACTION_STATUS,
                                           default='S')
